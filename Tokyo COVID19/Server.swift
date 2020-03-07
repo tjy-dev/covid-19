@@ -20,20 +20,45 @@ struct Server {
         }
     }
     
+    func getJsonData() {
+        AF.request("https://raw.githubusercontent.com/tokyo-metropolitan-gov/covid19/development/data/data.json", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON {response in
+            if let value = response.value{
+                self.delegate?.onSuccessGetJson(data: value)
+            }
+        }
+    }
     
+    func getNews() {
+        AF.request("https://raw.githubusercontent.com/tokyo-metropolitan-gov/covid19/development/data/news.json", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON {response in
+            if let value = response.value{
+                self.delegate?.onSuccessGetNews(data: value)
+            }
+        }
+    }
 }
 
 protocol serverDelegate {
     func onSuccessGet(data:String)
+    func onSuccessGetJson(data:Any)
+    func onSuccessGetNews(data:Any)
 }
 
 extension serverDelegate {
-    func onSuccessGet(data:String){
+    func onSuccessGet(data:String) {
+        return
+    }
+    func onSuccessGetJson(data:Any) {
+        return
+    }
+    func onSuccessGetNews(data:Any) {
         return
     }
 }
 
 
+
+//MARK: -NOT USING THIS BECAUSE IM USING JSON
+// ONLY NEED THIS WHILE USEING CSV DATA
 struct DataConvert {
     static func csvToDateArray(str:String) -> ([String],[String],[String],[String]){
         var presentDate:[String] = []
@@ -84,4 +109,5 @@ struct DataConvert {
         
         return returnData
     }
+
 }

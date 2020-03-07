@@ -15,13 +15,17 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
     
     //MARK: -Components
     let scroll = UIScrollView()
-    let view0 = ConsoltantAssistViewController()
-    let view1 = PositiveNumberViewController()
-    let view2 = AttributesViewController()
-    let view3 = ExaminationNumberViewController()
-    let view4 = CallNumberViewController()
-    let view5 = ConsultationViewController()
+    let view0 = NewsBannerViewController()
+    let view1 = ConsoltantAssistViewController()
+    let view2 = StateViewController()
+    let view3 = PositiveNumberViewController()
+    let view4 = AttributesViewController()
+    let view5 = ExaminationNumberViewController()
+    let view6 = ConsultationViewController()
+    let view7 = CallNumberViewController()
     let refresh = UIRefreshControl()
+    
+    var delegate:ViewControllerDelegate?
     
     //MARK: -Set Up
     override func viewDidLoad() {
@@ -31,13 +35,15 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
         //Access to server and get data
         var server = Server()
         server.delegate = self
-        server.getPositiveData()
+        //server.getPositiveData()
+        server.getJsonData()
+        server.getNews()
     }
     
     func configureNavigationBar() {
         self.navigationItem.title = "都内の最新感染動向"
         self.navigationController?.navigationBar.tintColor = .label
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.horizontal.3"), style: .plain, target: self, action: nil)
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "line.horizontal.3"), style: .plain, target: self, action: #selector(tappedLeftButton))
     }
     
     func configureScollView() {
@@ -45,7 +51,7 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
         scroll.backgroundColor = .background
         view.addSubview(scroll)
         
-        let views = [view0,view1,view2,view3,view4]
+        let views = [view0,view1,view2,view3,view4,view5,view6,view7]
         for view in views {
             addChild(view)
             didMove(toParent: view)
@@ -53,7 +59,6 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
         }
         
         //Delegate
-        view0.delegate = self
         view1.delegate = self
         
         //Refresh
@@ -69,11 +74,15 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
         
         scroll.frame = view.frame
         view0.view.frame = CGRect(x: 10, y: 20, width: contentWidth, height: 80)
-        view1.view.frame = CGRect(x: 10, y: 120, width: contentWidth, height: contentHeight)
+        view1.view.frame = CGRect(x: 10, y: view0.view.frame.maxY + 20, width: contentWidth, height: 80)
         view2.view.frame = CGRect(x: 10, y: view1.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
         view3.view.frame = CGRect(x: 10, y: view2.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
         view4.view.frame = CGRect(x: 10, y: view3.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
-        scroll.contentSize = CGSize(width: view.frame.width, height: view4.view.frame.maxY + 40)
+        view5.view.frame = CGRect(x: 10, y: view4.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
+        view6.view.frame = CGRect(x: 10, y: view5.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
+        view7.view.frame = CGRect(x: 10, y: view6.view.frame.maxY + 20, width: contentWidth, height: contentHeight)
+
+        scroll.contentSize = CGSize(width: view.frame.width, height: view7.view.frame.maxY + 40)
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -81,6 +90,10 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
     }
     
     //MARK: -Action
+    @objc func tappedLeftButton() {
+        delegate?.showMenu()
+    }
+    
     func pushToConsultantView() {
         let vc = ConsultViewController()
         navigationController?.pushViewController(vc, animated: true)
@@ -93,14 +106,27 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
     @objc func refreshAction(_ sender: UIRefreshControl) {
         var server = Server()
         server.delegate = self
-        server.getPositiveData()
+        server.getJsonData()
+        server.getNews()
     }
     
-    func onSuccessGet(data: String) {
+    func onSuccessGetJson(data: Any) {
+        endRefresh()
+        view2.onSuccessGetJson(data: data)
+        view3.onSuccessGetJson(data: data)
+        view4.onSuccessGetJson(data: data)
+        view5.onSuccessGetJson(data: data)
+    }
+    
+    func onSuccessGetNews(data: Any) {
+        view0.onSuccessGetNews(data: data)
+    }
+    
+    /*func onSuccessGet(data: String) {
         endRefresh()
         view1.onSuccessGet(data: data)
         view2.onSuccessGet(data: data)
-    }
+    }*/
     
 }
 
@@ -111,11 +137,6 @@ protocol HomeViewControllerDelegate {
 
 //MARK: -RootViewController for Components
 class RootComponentViewController: UIViewController {
-    override func viewDidLayoutSubviews() {
-        rightLabel.frame = CGRect(x: view.frame.width - 90, y: 20, width: 70, height: 30)
-        label.frame = CGRect(x: 20, y: 20, width: view.frame.width/2, height: 30)
-    }
-    
     let label = UILabel()
     let rightLabel = UILabel()
 
@@ -139,6 +160,41 @@ class RootComponentViewController: UIViewController {
         rightLabel.font = UIFont.systemFont(ofSize: 30, weight: .regular)
         view.addSubview(rightLabel)
     }
+    
+    override func viewDidLayoutSubviews() {
+        rightLabel.frame = CGRect(x: view.frame.width - 90, y: 20, width: 70, height: 30)
+        label.frame = CGRect(x: 20, y: 20, width: view.frame.width/2, height: 30)
+    }
+}
+
+//MARK: -News View
+class NewsBannerViewController: RootComponentViewController {
+    //MARK: -Components
+    let textLabel = UILabel()
+    
+    //MARK: -Set Up
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        label.text = "最新のお知らせ"
+        
+        textLabel.font = UIFont.systemFont(ofSize: 15, weight: .light)
+        view.addSubview(textLabel)
+    }
+    
+    func onSuccessGetNews(data: Any) {
+        let result = data as! NSDictionary
+        let newsItem = result["newsItems"] as! NSArray
+        let newsItem1 = newsItem[0] as! NSDictionary
+        textLabel.text = newsItem1["text"] as? String
+    }
+    
+    //MARK: -Set State
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        label.frame = CGRect(x: 20, y: 10, width: view.frame.width/2, height: 30)
+        textLabel.frame = CGRect(x: 20, y: 40, width: view.frame.width-40, height: 30)
+    }
 }
 
 //MARK: -View at top
@@ -155,7 +211,8 @@ class ConsoltantAssistViewController: RootComponentViewController {
         
         label.text = "自分や家族の症状に不安や心配があればまずは電話相談をどうぞ"
         label.numberOfLines = 0
-        
+        label.font = UIFont.systemFont(ofSize: 15, weight: .light)
+
         imageView.tintColor = .label
         imageView.image = UIImage(systemName: "chevron.right.circle",withConfiguration: UIImage.SymbolConfiguration(weight: .ultraLight))
         view.addSubview(imageView)
@@ -164,7 +221,6 @@ class ConsoltantAssistViewController: RootComponentViewController {
     //MARK: -Set State
     override func viewDidLayoutSubviews() {
         label.frame = CGRect(x: 20, y: 20, width: view.frame.width - 80, height: view.frame.height - 40)
-        label.font = UIFont.systemFont(ofSize: 15, weight: .light)
         
         imageView.frame = CGRect(x: view.frame.width - 60, y: 20, width: 40, height: 40)
     }
@@ -176,13 +232,101 @@ class ConsoltantAssistViewController: RootComponentViewController {
 }
 
 //MARK: -Second View
+class StateViewController: RootComponentViewController {
+    
+    let topView = UIView()
+    let secondView = UIView()
+    
+    let child1 = UIView()
+    let child2 = UIView()
+    let child3 = UIView()
+    let child4 = UIView()
+    let child5 = UIView()
+    
+    let label1 = UILabel()
+    let label2 = UILabel()
+    let label3 = UILabel()
+    let label4 = UILabel()
+    let label5 = UILabel()
+    let label6 = UILabel()
+    let label7 = UILabel()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        label.text = "陽性感染者の状況"
+        
+        let views = [label1:topView,label2:secondView,label3:child1,label4:child2,label5:child3,label6:child4,label7:child5]
+        for (label,view) in views {
+            self.view.addSubview(view)
+            view.layer.borderColor = UIColor.systemGreen.cgColor
+            view.layer.borderWidth = 3
+            view.layer.cornerRadius = 3
+            view.layer.cornerCurve = .continuous
+            view.addSubview(label)
+            label.textAlignment = .center
+        }
+        topView.layer.borderColor = UIColor.systemGray.cgColor
+    }
+    
+    func onSuccessGetJson(data:Any) {
+        let result = (data as! NSDictionary)["main_summary"] as! NSDictionary
+        label1.text = String(result["value"] as! Int)
+        
+        let ill = (result["children"] as! NSArray)[0] as! NSDictionary
+        label2.text = String(ill["value"] as! Int)
+        
+        let illExclusive = ill["children"] as! NSArray
+        let illExDict = illExclusive[0] as! NSDictionary
+        label3.text = String(illExDict["value"] as! Int)
+        
+        let inHospital = illExDict["children"] as! NSArray
+        label4.text = String((inHospital[0] as! NSDictionary)["value"] as! Int)
+        label5.text = String((inHospital[1] as! NSDictionary)["value"] as! Int)
+        
+        let outOfHospital = illExclusive[1] as! NSDictionary
+        label6.text = String(outOfHospital["value"] as! Int)
+        
+        let couldntSurvive = illExclusive[1] as! NSDictionary
+        label7.text = String(couldntSurvive["value"] as! Int)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let padding:CGFloat = 4
+        
+        let width = view.frame.width - 20
+        let width2 = width/2-padding/2//2分割
+        let width4 = width2/2-padding/2//4分割
+        
+        let height = (view.frame.height-label.frame.maxY-30)/5
+        let height2 = height*2 + padding
+        let height3 = height*3 + padding*2
+        
+        let views = [label1:topView,label2:secondView,label3:child1,label4:child2,label5:child3,label6:child4,label7:child5]
+        for (label,view) in views {
+            label.frame = CGRect(x: 0, y: 0, width: width4-10, height: height-10)
+            label.center = CGPoint(x: view.frame.width/2, y: view.frame.height/2)
+        }
+        
+        topView.frame = CGRect(x: 10, y: label.frame.maxY + padding, width: width, height: height)
+        secondView.frame = CGRect(x: 10, y: topView.frame.maxY + padding, width: width, height: height)
+        child1.frame = CGRect(x: 10, y: secondView.frame.maxY + padding, width: width2, height: height)
+        
+        child2.frame = CGRect(x: 10, y: child1.frame.maxY + padding, width: width4, height: height2)
+        child3.frame = CGRect(x: child2.frame.maxX + padding, y: child1.frame.maxY + padding, width: width4, height: height2)
+        
+        child4.frame = CGRect(x: child3.frame.maxX + padding, y: secondView.frame.maxY + padding, width: width4, height: height3)
+        child5.frame = CGRect(x: child4.frame.maxX + padding, y: secondView.frame.maxY + padding, width: width4, height: height3)
+    }
+}
+
+//MARK: -Third View
 class PositiveNumberViewController: RootComponentViewController, ChartViewDelegate {
     
     //MARK: -Components
     let barChart = BarChartView()
     let segment = UISegmentedControl()
     var number:[Int] = []
-    var delegate: HomeViewControllerDelegate?
     
     //MARK: -Set Up
     override func viewDidLoad() {
@@ -225,14 +369,15 @@ class PositiveNumberViewController: RootComponentViewController, ChartViewDelega
         
         barChart.doubleTapToZoomEnabled = false
         barChart.pinchZoomEnabled = false
-        
+        barChart.setScaleEnabled(false)
+
         barChart.delegate = self
         
         barChart.noDataTextColor = .label
         view.addSubview(barChart)
     }
     
-    func onSuccessGet(data: String) {
+    /*func onSuccessGet(data: String) {
         let presentDate:[String] = DataConvert.csvToDateArray(str: data).0
         let finalData:[[Date]] = DataConvert.dateArray(from: presentDate)
         
@@ -287,13 +432,62 @@ class PositiveNumberViewController: RootComponentViewController, ChartViewDelega
         self.barChart.data = chartData
         
         self.barChart.animate(yAxisDuration: 0.5, easingOption: .easeOutQuad)
+    }*/
+    
+    func onSuccessGetJson(data: Any) {
+        let patients_summary = (data as! NSDictionary)["patients_summary"] as! NSDictionary
+        let patients_number_data = patients_summary["data"] as! NSArray
+        
+        var patientNumber:[Int] = []
+        var labelArray:[String] = []
+        
+        for patients_data in patients_number_data {
+            let dict = patients_data as! NSDictionary
+            patientNumber.append(dict["小計"] as! Int)
+            
+            var dateString = dict["日付"] as! String
+            dateString = String(dateString.dropLast(14))
+            
+            let format = "yyyy-MM-dd"
+            let dateFormatter: DateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.dateFormat = format
+            let date = dateFormatter.date(from: dateString)
+            
+            dateFormatter.dateFormat = "M/dd"
+            labelArray.append(dateFormatter.string(from: date!))
+        }
+        
+        setBarChartData(labelArray, patientNumber)
+        
+        self.number = patientNumber
+        
+        rightLabel.text = "\(patientNumber.count)"
     }
     
+    func setBarChartData(_ label:[String],_ data1:[Int]) {
+        let formatter = ChartStringFormatter()
+        formatter.nameValues = label
+        self.barChart.xAxis.valueFormatter = formatter
+        
+        let entries = data1.enumerated().map { BarChartDataEntry(x: Double($0.offset), y: Double($0.element)) }
+        
+        let dataSet = BarChartDataSet(entries: entries)
+        dataSet.drawValuesEnabled = false
+        dataSet.colors = [.systemGreen]
+        dataSet.highlightColor = .myGreen
+        
+        let chartData = BarChartData(dataSet: dataSet)
+        
+        self.barChart.data = chartData
+        
+        self.barChart.animate(yAxisDuration: 0.5, easingOption: .easeOutQuad)
+    }
     
     //MARK: -Set State
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        barChart.frame = CGRect(x: 0, y: label.frame.maxY, width: view.frame.width, height: (view.frame.height - label.frame.maxY - 20))
+        barChart.frame = CGRect(x: 10, y: label.frame.maxY, width: view.frame.width-20, height: (view.frame.height - label.frame.maxY - 20))
     }
     
 }
@@ -308,7 +502,7 @@ class ChartStringFormatter: NSObject, IAxisValueFormatter {
     }
 }
 
-//MARK: -Third View
+//MARK: -Fourth View
 class AttributesViewController: RootComponentViewController,UITableViewDataSource {
     
     var table: UITableView!
@@ -352,10 +546,10 @@ class AttributesViewController: RootComponentViewController,UITableViewDataSourc
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         topBar.view.frame = CGRect(x: 10, y: label.frame.maxY, width: view.frame.width-20, height: 45)
-        table.frame = CGRect(x: 10, y: topBar.view.frame.maxY, width: view.frame.width-20, height: (view.frame.height - topBar.view.frame.maxY - 20))
+        table.frame = CGRect(x: 10, y: topBar.view.frame.maxY, width: view.frame.width-20, height: (view.frame.height - topBar.view.frame.maxY - 10))
     }
     
-    func onSuccessGet(data: String) {
+    /*func onSuccessGet(data: String) {
         let result = DataConvert.csvToDateArray(str: data)
         let rawPresentDate = result.0
         presentDate = []
@@ -378,6 +572,43 @@ class AttributesViewController: RootComponentViewController,UITableViewDataSourc
         }
         
         rightLabel.text = "\(presentDate.count)"
+        table.reloadData()
+    }*/
+    
+    func onSuccessGetJson(data: Any) {
+        let patients_summary = (data as! NSDictionary)["patients"] as! NSDictionary
+        let patients_exclusive_data = patients_summary["data"] as! NSArray
+        
+        var parientAge:[String] = []
+        var parientSex:[String] = []
+        var residence:[String] = []
+        var appearDate:[String] = []
+        
+        for patients_data in patients_exclusive_data {
+            
+            let dict = patients_data as! NSDictionary
+            parientAge.append(dict["年代"] as! String)
+            residence.append(dict["居住地"] as! String)
+            parientSex.append(dict["性別"] as! String)
+            
+            let dateString = dict["date"] as! String
+            
+            let format = "yyyy-MM-dd"
+            let dateFormatter: DateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.dateFormat = format
+            let date = dateFormatter.date(from: dateString)
+            
+            dateFormatter.dateFormat = "M/dd"
+            appearDate.append(dateFormatter.string(from: date!))
+        }
+        
+        self.presentDate = appearDate
+        self.residence = residence
+        self.age = parientAge
+        self.sex = parientSex
+        
+        rightLabel.text = "\(parientAge.count)"
         table.reloadData()
     }
 }
@@ -460,28 +691,148 @@ class TableViewCell: UITableViewCell {
     }
 }
 
-
-class ExaminationNumberViewController: RootComponentViewController {
+//MARK: -Fifth View
+class ExaminationNumberViewController: RootComponentViewController, ChartViewDelegate {
+    
+    let barChart = BarChartView()
+    var tokyo = [Int]()
+    var other = [Int]()
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        barChart.frame = CGRect(x: 10, y: label.frame.maxY, width: view.frame.width-20, height: (view.frame.height - label.frame.maxY - 20))
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureChart()
         label.text = "検査実施数"
-        rightLabel.text = "106"
+    }
+    
+    func configureChart() {
+        barChart.xAxis.labelPosition = .bottom
+        // X軸のラベルの色を設定
+        barChart.xAxis.labelTextColor = .label
+        barChart.leftAxis.labelTextColor = .label
+
+        // X軸の線、グリッドを非表示
+        barChart.xAxis.drawGridLinesEnabled = false
+        barChart.xAxis.drawAxisLineEnabled = false
+        barChart.xAxis.labelRotationAngle = -45.0
+        barChart.xAxis.labelCount = 10
+        
+        // Y軸の線を非表示
+        barChart.leftAxis.drawGridLinesEnabled = true
+        barChart.leftAxis.drawAxisLineEnabled = false
+        barChart.leftAxis.drawZeroLineEnabled = true
+        barChart.leftAxis.axisMinimum = 0.0
+        
+        barChart.rightAxis.enabled = false
+        
+        //凡例の設定
+        barChart.legend.enabled = false
+        
+        barChart.doubleTapToZoomEnabled = false
+        barChart.pinchZoomEnabled = false
+        barChart.setScaleEnabled(false)
+        
+        barChart.delegate = self
+        
+        barChart.noDataTextColor = .label
+        view.addSubview(barChart)
+    }
+    
+    func onSuccessGetJson(data: Any) {
+        let inspections = (data as! NSDictionary)["inspections"] as! NSDictionary
+        let inspections_datas = inspections["data"] as! NSArray
+        
+        var tokyo:[Int] = []
+        var other:[Int] = []
+        var appearDate:[String] = []
+        var number = 0
+
+        for inspections_data in inspections_datas {
+            let dict = inspections_data as! NSDictionary
+            
+            var num1 = dict["（小計①）"] as! String
+            num1 = String(num1.dropLast())
+            var num2 = dict["（小計②）"] as! String
+            num2 = String(num2.dropLast())
+
+            tokyo.append(Int(num1)!)
+            other.append(Int(num2)!)
+            
+            number = number + Int(num1)! + Int(num2)!
+            
+            let dateString = dict["判明日"] as! String
+            
+            let format = "M/dd/yyyy"
+            let dateFormatter: DateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.dateFormat = format
+            let date = dateFormatter.date(from: dateString)
+            
+            dateFormatter.dateFormat = "M/dd"
+            appearDate.append(dateFormatter.string(from: date!))
+        }
+        
+        
+        self.tokyo = tokyo
+        self.other = other
+        
+        setBarChartData(appearDate, tokyo, other)
+        
+        rightLabel.text = String(number)
+    }
+    
+    func setBarChartData(_ label:[String],_ data1:[Int],_ data2:[Int]){
+        let formatter = ChartStringFormatter()
+        formatter.nameValues = label
+        self.barChart.xAxis.valueFormatter = formatter
+        
+        let count = data1.count
+        let yVals = (0..<count).map { (i) -> BarChartDataEntry in
+            let val1 = Double(data1[i])
+            let val2 = Double(data2[i])
+            
+            return BarChartDataEntry(x: Double(i), yValues: [val1, val2])
+        }
+        
+        let dataSet = BarChartDataSet(entries: yVals)
+        dataSet.drawValuesEnabled = false
+        dataSet.colors = [.myGreen,.systemGreen]
+        dataSet.highlightEnabled = false
+        let chartData = BarChartData(dataSet: dataSet)
+
+        
+        self.barChart.data = chartData
+        
+        self.barChart.animate(yAxisDuration: 0.5, easingOption: .easeOutQuad)
+    }
+    
+    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        if let dataSet = barChart.data?.dataSets[highlight.dataSetIndex] {
+            let sliceIndex: Int = dataSet.entryIndex(entry: entry)
+            let value = tokyo[sliceIndex]
+            print(value)
+        }
     }
 }
 
+//MARK: -Sixth View
 class CallNumberViewController: RootComponentViewController {
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         label.text = "コールセンター相談件数"
     }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+    }
+
 }
 
+//MARK: -Seventh View
 class ConsultationViewController: RootComponentViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()

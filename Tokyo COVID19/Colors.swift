@@ -41,6 +41,22 @@ extension UIColor {
             })
         }
     }
+    
+    class var myGreen : UIColor {
+        get {
+            .init(dynamicProvider: { (traitCollection) -> UIColor in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return #colorLiteral(red: 0.1843045056, green: 0.5991593599, blue: 0.2625842988, alpha: 1)
+                case .light:
+                    return #colorLiteral(red: 0.1843045056, green: 0.5991593599, blue: 0.2625842988, alpha: 1)
+                case .unspecified:
+                    return .clear
+                @unknown default: return .clear
+                }
+            })
+        }
+    }
 }
 
 extension UITraitCollection {

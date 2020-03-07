@@ -1,0 +1,31 @@
+PODS:
+  - Alamofire (5.0.2)
+  - AlamofireImage (4.0.2):
+    - Alamofire (< 6.0.0, >= 5.0.2)
+  - Charts (3.4.0):
+    - Charts/Core (= 3.4.0)
+  - Charts/Core (3.4.0)
+  - CropViewController (2.5.2)
+
+DEPENDENCIES:
+  - Alamofire
+  - AlamofireImage
+  - Charts
+  - CropViewController
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - AlamofireImage
+    - Charts
+    - CropViewController
+
+SPEC CHECKSUMS:
+  Alamofire: 3ba7a4db18b4f62c4a1c0e1cb39d7f3d52e10ada
+  AlamofireImage: ca7325440303d041a80b7caa55066ba945522378
+  Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
+  CropViewController: 1aac40093c5739e60d992b04724a55d12a689a4c
+
+PODFILE CHECKSUM: 0725623eaf09c6c8746797bf25e4e3e75ae06388
+
+COCOAPODS: 1.8.4

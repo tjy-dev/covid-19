@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/Pods-Tokyo COVID19-Tokyo COVID19UITests/Pods-Tokyo COVID19-Tokyo COVID19UITests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
+${BUILT_PRODUCTS_DIR}/AlamofireImage/AlamofireImage.framework
+${BUILT_PRODUCTS_DIR}/Charts/Charts.framework
+${BUILT_PRODUCTS_DIR}/CropViewController/CropViewController.framework

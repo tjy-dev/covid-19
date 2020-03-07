@@ -1,0 +1,6 @@
+framework module Pods_Tokyo_COVID19Tests {
+  umbrella header "Pods-Tokyo COVID19Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

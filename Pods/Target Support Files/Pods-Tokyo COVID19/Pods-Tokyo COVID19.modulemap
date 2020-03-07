@@ -1,0 +1,6 @@
+framework module Pods_Tokyo_COVID19 {
+  umbrella header "Pods-Tokyo COVID19-umbrella.h"
+
+  export *
+  module * { export * }
+}

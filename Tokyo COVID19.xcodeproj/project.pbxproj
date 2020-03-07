@@ -67,6 +67,7 @@
 		7A601E502411207300285989 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		7A7A13A5241210C6001A8580 /* Server.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
 		7A7A13A9241216B3001A8580 /* ConsultantAssistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsultantAssistViewController.swift; sourceTree = "<group>"; };
+		7A7A13AB241331BE001A8580 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7FDD37A1254019299915B4F2 /* Pods-Tokyo COVID19.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tokyo COVID19.release.xcconfig"; path = "Target Support Files/Pods-Tokyo COVID19/Pods-Tokyo COVID19.release.xcconfig"; sourceTree = "<group>"; };
 		91199A71E472CDA59F7E3C37 /* Pods-Tokyo COVID19Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tokyo COVID19Tests.release.xcconfig"; path = "Target Support Files/Pods-Tokyo COVID19Tests/Pods-Tokyo COVID19Tests.release.xcconfig"; sourceTree = "<group>"; };
 		CEE841019E664F8758F605AC /* Pods-Tokyo COVID19-Tokyo COVID19UITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tokyo COVID19-Tokyo COVID19UITests.debug.xcconfig"; path = "Target Support Files/Pods-Tokyo COVID19-Tokyo COVID19UITests/Pods-Tokyo COVID19-Tokyo COVID19UITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -114,6 +115,7 @@
 		7A601E0F24110D0400285989 = {
 			isa = PBXGroup;
 			children = (
+				7A7A13AB241331BE001A8580 /* README.md */,
 				7A601E1A24110D0400285989 /* Tokyo COVID19 */,
 				7A601E3424110D0600285989 /* Tokyo COVID19Tests */,
 				7A601E3F24110D0600285989 /* Tokyo COVID19UITests */,

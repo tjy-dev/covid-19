@@ -17,10 +17,10 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
     let scroll = UIScrollView()
     let view0 = NewsBannerViewController()
     let view1 = ConsoltantAssistViewController()
-    let view2 = StateViewController()
-    let view3 = PositiveNumberViewController()
-    let view4 = AttributesViewController()
-    let view5 = ExaminationNumberViewController()
+    let view2 = PositiveNumberViewController()
+    let view3 = AttributesViewController()
+    let view4 = ExaminationNumberViewController()
+    let view5 = StateViewController()
     let view6 = ConsultationViewController()
     let view7 = CallNumberViewController()
     let refresh = UIRefreshControl()
@@ -162,7 +162,7 @@ class RootComponentViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        rightLabel.frame = CGRect(x: view.frame.width - 90, y: 20, width: 70, height: 30)
+        rightLabel.frame = CGRect(x: view.frame.width - 120, y: 20, width: 100, height: 30)
         label.frame = CGRect(x: 20, y: 20, width: view.frame.width/2, height: 30)
     }
 }
@@ -286,7 +286,7 @@ class StateViewController: RootComponentViewController {
         let outOfHospital = illExclusive[1] as! NSDictionary
         label6.text = String(outOfHospital["value"] as! Int)
         
-        let couldntSurvive = illExclusive[1] as! NSDictionary
+        let couldntSurvive = illExclusive[2] as! NSDictionary
         label7.text = String(couldntSurvive["value"] as! Int)
     }
     
@@ -576,22 +576,37 @@ class AttributesViewController: RootComponentViewController,UITableViewDataSourc
     }*/
     
     func onSuccessGetJson(data: Any) {
-        let patients_summary = (data as! NSDictionary)["patients"] as! NSDictionary
-        let patients_exclusive_data = patients_summary["data"] as! NSArray
+        let patients_summary = data as! NSDictionary
+        let summary = patients_summary["patients"] as! NSDictionary
+        let patients_exclusive_data = summary["data"] as! NSArray
         
         var parientAge:[String] = []
         var parientSex:[String] = []
         var residence:[String] = []
         var appearDate:[String] = []
         
-        for patients_data in patients_exclusive_data {
-            
-            let dict = patients_data as! NSDictionary
-            parientAge.append(dict["年代"] as! String)
-            residence.append(dict["居住地"] as! String)
-            parientSex.append(dict["性別"] as! String)
+        //for patients_data in patients_exclusive_data {
+        for i in 0..<patients_exclusive_data.count {
+            let dict = patients_exclusive_data[i] as! NSDictionary
             
             let dateString = dict["date"] as! String
+            
+            var dict1 = "不明"
+            var dict2 = "不明"
+            var dict3 = "不明"
+            
+            if dict["居住地"] as? String? != nil {
+                dict1 = dict["居住地"] as! String
+            }
+            if dict["年代"] as? String? != nil {
+                dict2 = dict["年代"] as! String
+            }
+            if dict["性別"] as? String? != nil {
+                dict3 = dict["性別"] as! String
+            }
+            residence.append(dict1)
+            parientAge.append(dict2)
+            parientSex.append(dict3)
             
             let format = "yyyy-MM-dd"
             let dateFormatter: DateFormatter = DateFormatter()
@@ -743,39 +758,31 @@ class ExaminationNumberViewController: RootComponentViewController, ChartViewDel
     }
     
     func onSuccessGetJson(data: Any) {
-        let inspections = (data as! NSDictionary)["inspections"] as! NSDictionary
-        let inspections_datas = inspections["data"] as! NSArray
+        let inspections = (data as! NSDictionary)["inspections_summary"] as! NSDictionary
+        let inspections_datas = inspections["data"] as! NSDictionary
+        let tokyo_data = inspections_datas["都内"] as! NSArray
+        let other_data = inspections_datas["その他"] as! NSArray
+        let label_data = inspections["labels"] as! NSArray
         
         var tokyo:[Int] = []
         var other:[Int] = []
         var appearDate:[String] = []
         var number = 0
-
-        for inspections_data in inspections_datas {
-            let dict = inspections_data as! NSDictionary
-            
-            var num1 = dict["（小計①）"] as! String
-            num1 = String(num1.dropLast())
-            var num2 = dict["（小計②）"] as! String
-            num2 = String(num2.dropLast())
-
-            tokyo.append(Int(num1)!)
-            other.append(Int(num2)!)
-            
-            number = number + Int(num1)! + Int(num2)!
-            
-            let dateString = dict["判明日"] as! String
-            
-            let format = "M/dd/yyyy"
-            let dateFormatter: DateFormatter = DateFormatter()
-            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-            dateFormatter.dateFormat = format
-            let date = dateFormatter.date(from: dateString)
-            
-            dateFormatter.dateFormat = "M/dd"
-            appearDate.append(dateFormatter.string(from: date!))
-        }
         
+        for data in tokyo_data{
+            let dict_data = data as! Int
+            tokyo.append(dict_data)
+            number += dict_data
+        }
+        for data in other_data{
+            let dict_data = data as! Int
+            other.append(dict_data)
+            number += dict_data
+        }
+        for data in label_data{
+            let dict_data = data as! String
+            appearDate.append(dict_data)
+        }
         
         self.tokyo = tokyo
         self.other = other

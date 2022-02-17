@@ -24,6 +24,11 @@ struct Server {
         AF.request("https://raw.githubusercontent.com/tokyo-metropolitan-gov/covid19/development/data/data.json", method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON {response in
             if let value = response.value{
                 self.delegate?.onSuccessGetJson(data: value)
+                //print(value)
+            }
+            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                //print("Data: \(utf8Text)")  // original server data as UTF8 String
+                //self.delegate?.onSuccessGetJson(data: utf8Text)
             }
         }
     }

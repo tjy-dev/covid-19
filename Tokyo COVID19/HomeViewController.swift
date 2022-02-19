@@ -113,9 +113,9 @@ class HomeViewController: UIViewController, HomeViewControllerDelegate, serverDe
     func onSuccessGetJson(data: Any) {
         endRefresh()
         view2.onSuccessGetJson(data: data)
-        view3.onSuccessGetJson(data: data)
+        //view3.onSuccessGetJson(data: data)
         view4.onSuccessGetJson(data: data)
-        view5.onSuccessGetJson(data: data)
+        //view5.onSuccessGetJson(data: data)
     }
     
     func onSuccessGetNews(data: Any) {
@@ -576,9 +576,10 @@ class AttributesViewController: RootComponentViewController,UITableViewDataSourc
     }*/
     
     func onSuccessGetJson(data: Any) {
-        let patients_summary = data as! NSDictionary
-        let summary = patients_summary["patients"] as! NSDictionary
-        let patients_exclusive_data = summary["data"] as! NSArray
+        let json = data as! NSDictionary
+        let patients_summary = json["patients_summary"] as! NSDictionary
+        //let summary = patients_summary["patients"] as! NSDictionary
+        let patients_exclusive_data = patients_summary["data"] as! NSArray
         
         var parientAge:[String] = []
         var parientSex:[String] = []
